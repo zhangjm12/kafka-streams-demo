@@ -32,15 +32,26 @@ public class MetricRateAggregate {
         if (count==0) {
             firstValue = value;
             firstTS = ts;
-            count++;
-        } else {
             lastValue = value;
             lastTS = ts;
             count++;
+        } else {
+            if (ts < firstTS) {
+                firstTS = ts;
+                firstValue = value;
+            } else if (ts > lastTS) {
+                lastTS = ts;
+                lastValue = value;
+            }
+            count++;
         }
+        count++;
         return this;
     }
 
+    public int getCount() {
+        return count;
+    }
     public double getRate() {
         if (lastTS > firstTS) {
             return 1000 * (lastValue - firstValue) / (lastTS - firstTS);

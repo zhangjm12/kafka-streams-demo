@@ -12,10 +12,13 @@ import com.lenovo.aiops.streams.serde.MetricEnvelopeSerde;
 import com.lenovo.aiops.streams.serde.MetricRateAggregateSerde;
 import com.lenovo.aiops.streams.serde.SumRateAggregateSerde;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.WindowStore;
 import org.apache.kafka.common.utils.Bytes;
@@ -34,12 +37,14 @@ public class StreamTestProcessor {
 			streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());//
 			streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, MetricEnvelopeSerde.class.getName());
 			streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, MetricEnvelopeTimestampExtractor.class.getName());
+			streamsConfiguration.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class.getName());
 
 			final StreamsBuilder builder = new StreamsBuilder();
 
 			MetricEnvelopeSerde metricEnvelopeSerde = new MetricEnvelopeSerde();
 
-			final KStream<String, MetricEnvelope> envelopeKStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), metricEnvelopeSerde));
+			final KStream<String, MetricEnvelope> envelopeKStream = builder.stream(inputTopic,
+					Consumed.with(Serdes.String(), metricEnvelopeSerde)); //.withOffsetResetPolicy(Topology.AutoOffsetReset.LATEST));
 
 			final KStream<String, MetricEnvelope> requestStream = envelopeKStream
 					.filter((k,v) -> {

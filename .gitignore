@@ -1,5 +1,5 @@
 .settings
 .class
 .idea
-kafka-streams-test.iml
+kafka-streams-demo.iml
 target/
