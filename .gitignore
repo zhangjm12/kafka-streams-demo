@@ -1,0 +1,5 @@
+.settings
+.class
+.idea
+kafka-streams-test.iml
+target/
