@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.lenovo</groupId>
-    <artifactId>kafka-streams-test</artifactId>
+    <artifactId>kafka-streams-demo</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0</version>
 
     <description>
-        Kafka Streams Test
+        Kafka Streams Demo
     </description>
 
     <properties>
