@@ -34,7 +34,6 @@ public class MetricRateAggregate {
             firstTS = ts;
             lastValue = value;
             lastTS = ts;
-            count++;
         } else {
             if (ts < firstTS) {
                 firstTS = ts;
@@ -43,7 +42,6 @@ public class MetricRateAggregate {
                 lastTS = ts;
                 lastValue = value;
             }
-            count++;
         }
         count++;
         return this;
