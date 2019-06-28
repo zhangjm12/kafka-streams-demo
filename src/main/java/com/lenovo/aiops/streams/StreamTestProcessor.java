@@ -12,7 +12,6 @@ import com.lenovo.aiops.streams.serde.MetricEnvelopeSerde;
 import com.lenovo.aiops.streams.serde.MetricRateAggregateSerde;
 import com.lenovo.aiops.streams.serde.SumRateAggregateSerde;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -44,20 +43,37 @@ public class StreamTestProcessor {
 			MetricEnvelopeSerde metricEnvelopeSerde = new MetricEnvelopeSerde();
 
 			final KStream<String, MetricEnvelope> envelopeKStream = builder.stream(inputTopic,
-					Consumed.with(Serdes.String(), metricEnvelopeSerde)); //.withOffsetResetPolicy(Topology.AutoOffsetReset.LATEST));
+					Consumed.with(Serdes.String(), metricEnvelopeSerde).withOffsetResetPolicy(Topology.AutoOffsetReset.LATEST));
 
-			final KStream<String, MetricEnvelope> requestStream = envelopeKStream
-					.filter((k,v) -> {
+			Predicate<String, MetricEnvelope> isRequest =
+					 	(k, v) -> {
+							Metric m = v.getMetric();
+							if (m.getName().equals("nginx_requests_total")) {
+								Map<String, String> d = m.getDimensions();
+								if (d.containsKey("server_zone"))
+									return true;
+							}
+							return false;
+						};
+
+			Predicate<String, MetricEnvelope> isResponse =
+					(k, v) -> {
 						Metric m = v.getMetric();
-						if (m.getName().equals("nginx_requests_total")) {
+						if (m.getName().equals("nginx_responses_total")) {
 							Map<String, String> d = m.getDimensions();
-							if (d.containsKey("server_zone"))
+							if (d.containsKey("server_zone") && d.containsKey("status_code") && d.get("status_code").trim().length()>0)
 								return true;
 						}
 						return false;
-					});
+					};
 
-			final KStream<String, MetricEnvelope> rateRequestStream = requestStream
+			int request = 0;
+			int response = 1;
+
+			final KStream<String, MetricEnvelope>[] streamByType =
+					envelopeKStream.branch(isRequest, isResponse);
+
+			final KStream<String, MetricEnvelope> rateRequestStream = streamByType[request]
 					.groupBy((key,value) -> value.getMetric().getDimensions().get("server_zone"))
 					.windowedBy(TimeWindows.of(Duration.ofSeconds(15)).advanceBy(Duration.ofSeconds(5)).grace(Duration.ofSeconds(5)))
 					.aggregate(
@@ -95,18 +111,7 @@ public class StreamTestProcessor {
 			rateRequestStream.print(Printed.toSysOut());
 			rateRequestStream.to(inputTopic, Produced.with(Serdes.String(), new MetricEnvelopeSerde()));
 
-			final KStream<String, MetricEnvelope> responseStream = envelopeKStream
-				  .filter((k,v) -> {
-					  Metric m = v.getMetric();
-					  if (m.getName().equals("nginx_responses_total")) {
-						  Map<String, String> d = m.getDimensions();
-						  if (d.containsKey("server_zone") && d.containsKey("status_code") && d.get("status_code").trim().length()>0)
-							  return true;
-					  }
-					  return false;
-				  });
-
-			final KStream<String, MetricEnvelope> rateResponseStream = responseStream
+			final KStream<String, MetricEnvelope> rateResponseStream = streamByType[1]
 				  .groupBy((key,value) -> value.getMetric().getDimensions().get("server_zone"))
 				  .windowedBy(TimeWindows.of(Duration.ofSeconds(15)).advanceBy(Duration.ofSeconds(5)).grace(Duration.ofSeconds(5)))
 				  .aggregate(
