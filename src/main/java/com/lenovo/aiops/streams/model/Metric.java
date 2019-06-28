@@ -72,6 +72,6 @@ public class Metric {
     }
 
     public void setValueMeta(Map<String, String> valueMeta) {
-        this.value_meta = value_meta;
+        this.value_meta = valueMeta;
     }
 }

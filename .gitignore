@@ -1,5 +1,8 @@
 .settings
 .class
 .idea
+.classpath
+.project
+.vscode/
 kafka-streams-demo.iml
 target/
