@@ -111,7 +111,7 @@ public class StreamTestProcessor {
 			rateRequestStream.print(Printed.toSysOut());
 			rateRequestStream.to(inputTopic, Produced.with(Serdes.String(), new MetricEnvelopeSerde()));
 
-			final KStream<String, MetricEnvelope> rateResponseStream = streamByType[1]
+			final KStream<String, MetricEnvelope> rateResponseStream = streamByType[response]
 				  .groupBy((key,value) -> value.getMetric().getDimensions().get("server_zone"))
 				  .windowedBy(TimeWindows.of(Duration.ofSeconds(15)).advanceBy(Duration.ofSeconds(5)).grace(Duration.ofSeconds(5)))
 				  .aggregate(
