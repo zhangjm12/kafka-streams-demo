@@ -27,6 +27,7 @@ public class StreamTestProcessor {
 
 		public static void main(final String[] args) {
 			final String bootstrapServers = args.length > 0 ? args[0] : "10.121.9.164:31092";
+			final String tenantId = args.length > 1 ? args[1] : "5d4632a0ad404ff19c862fecd65d57ef";
 
 			final Properties streamsConfiguration = new Properties();
 			streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-stream-test");
@@ -98,10 +99,9 @@ public class StreamTestProcessor {
 						HashMap<String, String> d = new HashMap<>();
 						d.put("server_zone", k.key());
 						m.setDimensions(d);
-						m.setValueMeta(null);
 
 						HashMap<String, Object> meta = new HashMap<>();
-						meta.put("tenantId", "5d4632a0ad404ff19c862fecd65d57ef");
+						meta.put("tenantId", tenantId);
 						meta.put("region", "useast");
 						MetricEnvelope env = new MetricEnvelope(m, meta);
 						return env;
@@ -137,10 +137,9 @@ public class StreamTestProcessor {
 						HashMap<String, String> d = new HashMap<>();
 						d.put("server_zone", k.key());
 						m.setDimensions(d);
-						m.setValueMeta(null);
 
 						HashMap<String, Object> meta = new HashMap<>();
-						meta.put("tenantId", "5d4632a0ad404ff19c862fecd65d57ef");
+						meta.put("tenantId", tenantId);
 						meta.put("region", "useast");
 						MetricEnvelope env = new MetricEnvelope(m, meta);
 						return env;
@@ -152,7 +151,7 @@ public class StreamTestProcessor {
 
 			final KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsConfiguration);
 
-			  kafkaStreams.setUncaughtExceptionHandler((Thread thread, Throwable throwable) -> {
+			kafkaStreams.setUncaughtExceptionHandler((Thread thread, Throwable throwable) -> {
 				  throwable.printStackTrace();
 			  });
 
