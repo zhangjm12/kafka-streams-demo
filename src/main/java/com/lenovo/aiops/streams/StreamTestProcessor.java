@@ -30,8 +30,8 @@ public class StreamTestProcessor {
 			final String tenantId = args.length > 1 ? args[1] : "5d4632a0ad404ff19c862fecd65d57ef";
 
 			final Properties streamsConfiguration = new Properties();
-			streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-stream-test");
-			streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "kafka-stream-test-client");
+			streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-stream-demo");
+			streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "kafka-stream-demo-client");
 			streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
 			streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());//
